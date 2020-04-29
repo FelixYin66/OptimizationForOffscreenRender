@@ -98,7 +98,7 @@ class TableViewController: UITableViewController {
         return cell
     }
 
-    func dynamicallyUpdateCell(_ cell: UITableViewCell){
+    @objc func dynamicallyUpdateCell(_ cell: UITableViewCell){
 
         let number = Int(UInt32(arc4random()) % UInt32(10))
 
