@@ -87,7 +87,7 @@ class TableViewController: UITableViewController {
 
         /*-------------------------------------------------------------------------------------------------------------------------------------------------------------*/
         /*Mask Test: Is maskLayer more transparent part, performance better? No obvious impact.*/
-//                applyMaskOn(cell)
+                applyMaskOn(cell)
 
         /*-------------------------------------------------------------------------------------------------------------------------------------------------------------*/
         //Ultimate solution: Rasterization, works for roundedCorner, shadow, mask and has very good performance.
@@ -141,6 +141,9 @@ class TableViewController: UITableViewController {
         avatorViewR.layer.masksToBounds = true
     }
 
+    
+    /// 直接在主线程中重新绘制圆角
+    /// - Parameter cell: UITableViewCell
     func redrawRounedCornerInMainThreadOn(_ cell: UITableViewCell) {
         let avatorViewL = cell.viewWithTag(10) as! UIImageView
         let roundedCornerImageL = drawImage(image: avatorImageL!, rectSize: CGSize(width: 80, height: 80), roundedRadius: 10.0)
@@ -153,6 +156,9 @@ class TableViewController: UITableViewController {
 
     }
 
+    
+    /// 在后台线程重新绘制圆角
+    /// - Parameter cell: UITableViewCell
     func redrawRoundedCornerInBackgroundThreadOn(_ cell: UITableViewCell) {
         let avatorViewL = cell.viewWithTag(10) as! UIImageView
         let avatorViewR = cell.viewWithTag(20) as! UIImageView
@@ -167,6 +173,7 @@ class TableViewController: UITableViewController {
         }
     }
 
+    //使用混合图层解决圆角问题
     func blendRoundedCornerOn(_ cell: UITableViewCell) {
         let avatorViewL = cell.viewWithTag(10) as! UIImageView
         let avatorViewR = cell.viewWithTag(20) as! UIImageView
@@ -182,6 +189,9 @@ class TableViewController: UITableViewController {
         blendViewR.isHidden = false
     }
 
+    
+    /// 使用系统提供的方法添加阴影 会出现离屏渲染问题
+    /// - Parameter cell: UITableViewCell
     func dropShadownOn(_ cell: UITableViewCell){
         let avatorViewL = cell.viewWithTag(10) as! UIImageView
         let avatorViewR = cell.viewWithTag(20) as! UIImageView
@@ -198,12 +208,17 @@ class TableViewController: UITableViewController {
     }
 
     //Optimization for shadow
+    
+    /// 使用阴影路径方式添加阴影
+    /// - Parameter view: UIView
     func specifyShadowPathOn(_ view: UIView) {
         let path = UIBezierPath(rect: view.bounds)
         view.layer.shadowPath = path.cgPath
     }
 
-
+    
+    /// 通过Mask 实现圆角
+    /// - Parameter cell: UITableViewCell
     func applyMaskOn(_ cell: UITableViewCell) {
         let avatorViewL = cell.viewWithTag(10) as! UIImageView
         let avatorViewR = cell.viewWithTag(20) as! UIImageView
