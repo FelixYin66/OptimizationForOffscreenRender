@@ -9,6 +9,39 @@
 import UIKit
 
 
+/*
+ 什么情况会造成离屏渲染：
+ shouldRasterize，masks，shadows，edge antialiasing（抗锯齿），group opacity（不透明），渐变
+ 在使用圆角、阴影和遮罩等视图功能的时候，图层属性的混合体被指定为在未预合成之前不能直接在屏幕中绘制，所有就需要在屏幕外的上下文中渲染，即离屏渲染
+ 
+ 
+ 离屏渲染卡顿原因：
+ 离屏渲染之所以会特别消耗性能，是因为要创建一个屏幕外的缓冲区，然后从当屏缓冲区切换到屏幕外的缓冲区，然后再完成渲染；其中，创建缓冲区和切换上下文最消耗性能，而绘制其实不是性能损耗的主要原因。
+ 
+ 
+ 
+ 光栅化：
+ 栅（shān）格化，是PS中的一个专业术语，栅格即像素，栅格化即将矢量图形转化为位图（栅格图像）。最基础的栅格化算法将多边形表示的三维场景渲染到二维表面。
+ 
+ CALayer 有一个 shouldRasterize 属性，将这个属性设置成 true 后就开启了光栅化。开启shouldRasterize后,CALayer会被栅格化为bitmap,layer的阴影等效果也会被保存到bitmap中，光栅化后会将图层绘制到一个屏幕外的图像，然后这个图像将会被缓存起来并绘制到实际图层的 contents 和子图层，对于有很多的子图层或者有复杂的效果应用，这样做就会比重绘所有事务的所有帧来更加高效。但是光栅化原始图像需要时间，而且会消耗额外的内存。
+ 
+ View Debug:
+ 
+ Color Blended Layers
+ 
+ 这个选项基于渲染程度对屏幕中的混合区域进行绿到红的高亮（也就是多个半透明图层的叠加）。由于重绘的原因，混合对GPU性能会有影响，同时也是滑动或者动画帧率下降的罪魁祸首之一
+ 
+ 
+ Color Hits Green and Misses Red
+ 
+ 当设置shouldRasterizep属性为YES的时候，耗时的图层绘制会被缓存，然后当做一个简单的扁平图片呈现。当缓存再生的时候这个选项就用红色对栅格化图层进行了高亮。如果缓存频繁再生的话，就意味着栅格化可能会有负面的性能影响了
+ 
+ Color Offscreen-Rendered Yellow
+ 
+ 开启后会把那些需要离屏渲染的图层高亮成黄色，这就意味着黄色图层可能存在性能问题
+ 
+ */
+
 class TableViewController: UITableViewController {
 
     let cellIdentifier = "Cell"
@@ -59,7 +92,7 @@ class TableViewController: UITableViewController {
         /*RounderCorner Test*/
 
         //System Rounded Corner: if layer's contents is not nil, masksToBounds must be true. Is cornerRadius bigger, performance worse? No, when cornerRadius > 0, performance is same almost.
-        //        applySystemRoundedCornerOn(cell)
+//            applySystemRoundedCornerOn(cell)
 
         /*RounedCorner solution:
          1. Redraw contents and clip as rouned corner contens;
@@ -67,37 +100,41 @@ class TableViewController: UITableViewController {
          */
 
         //Redraw in main thread, put it in background thread is better.
-//                redrawRounedCornerInMainThreadOn(cell)
+//                redrawRounedCornerInMainThreadOn(cell)  //在主线程中重新绘制UIImage
 
         //Redraw in background thread, performance is nice.
-        //        redrawRoundedCornerInBackgroundThreadOn(cell)
+        //        redrawRoundedCornerInBackgroundThreadOn(cell)//在后台线程中重新绘制UIImage
 
         //This solution needs a image which is partly transparent. You can paint it by Sketch, PaintCode, or draw it with Core Graphics API.
 //                blendRoundedCornerOn(cell)
 
         /*-------------------------------------------------------------------------------------------------------------------------------------------------------------*/
         /*Shadow Test: shadow is not compatible with system rouned corner, because layer.masksToBounds can't be true in shadow affect.*/
-//                dropShadownOn(cell)
+                dropShadownOn(cell)
 
         //Optimization for shadow: a shadow path can cancel offscreen render effect
-        //        let avatorViewL = cell.viewWithTag(10) as! UIImageView
-        //        specifyShadowPathOn(avatorViewL)
-        //        let avatorViewR = cell.viewWithTag(20) as! UIImageView
-        //        specifyShadowPathOn(avatorViewR)
+//                let avatorViewL = cell.viewWithTag(10) as! UIImageView
+//                specifyShadowPathOn(avatorViewL)
+//                let avatorViewR = cell.viewWithTag(20) as! UIImageView
+//                specifyShadowPathOn(avatorViewR)
 
         /*-------------------------------------------------------------------------------------------------------------------------------------------------------------*/
         /*Mask Test: Is maskLayer more transparent part, performance better? No obvious impact.*/
-                applyMaskOn(cell)
+//                applyMaskOn(cell)
 
         /*-------------------------------------------------------------------------------------------------------------------------------------------------------------*/
         //Ultimate solution: Rasterization, works for roundedCorner, shadow, mask and has very good performance.
 //                enableRasterizationOn(cell)
 
         //Simulate danamic content
-//                dynamicallyUpdateCell(cell)
+//        dynamicallyUpdateCell(cell)
         return cell
     }
 
+    /*
+     出现离屏渲染，帧率平均在 55fps，GPU使用率在80% (iPhone 6plus iOS 10.2.4)
+     没有出现离屏渲染，帧率平均在56fps，GPU使用率在8%(iPhone Xs iOS 12.4)
+     */
     @objc func dynamicallyUpdateCell(_ cell: UITableViewCell){
 
         let number = Int(UInt32(arc4random()) % UInt32(10))
@@ -129,6 +166,13 @@ class TableViewController: UITableViewController {
         avatorViewR.image = avatorImageR
     }
 
+    /*
+     运行在iOS 12.4,不存在离屏渲染,fps 达到58接近60 （iPhone Xs iOS 12.4）
+     
+     运行在iOS 10.2.1,圆角触发离屏渲染, fps平均达到50以上，GPU使用率达到80%以上(iPhone 6plus iOS 10.2.4)
+     
+     说明在iOS 12上苹果对 UIImageView 离屏渲染进行优化，不会出现这种情况
+     */
     func applySystemRoundedCornerOn(_ cell: UITableViewCell) {
         let avatorViewL = cell.viewWithTag(10) as! UIImageView
         avatorViewL.image = avatorImageL
@@ -144,6 +188,11 @@ class TableViewController: UITableViewController {
     
     /// 直接在主线程中重新绘制圆角
     /// - Parameter cell: UITableViewCell
+    
+    /*
+     不存在离屏渲染，帧率平均达到53fps，GPU使用率达到20% iPhone 6plus
+     不存在离屏渲染，帧率平均达到56fps，GPU使用率达到10% iPhone Xs
+     */
     func redrawRounedCornerInMainThreadOn(_ cell: UITableViewCell) {
         let avatorViewL = cell.viewWithTag(10) as! UIImageView
         let roundedCornerImageL = drawImage(image: avatorImageL!, rectSize: CGSize(width: 80, height: 80), roundedRadius: 10.0)
@@ -190,7 +239,10 @@ class TableViewController: UITableViewController {
     }
 
     
-    /// 使用系统提供的方法添加阴影 会出现离屏渲染问题
+    /*
+     会出现离屏渲染，帧率在30fps以下，GPU使用率平均在80% （iPhone 6plus iOS 10.2.4） 耗电严重
+     会出现离屏渲染，平均帧率在55fps，GPU使用率平均在50% （iPhone Xs iOS 12.4）耗电严重
+     */
     /// - Parameter cell: UITableViewCell
     func dropShadownOn(_ cell: UITableViewCell){
         let avatorViewL = cell.viewWithTag(10) as! UIImageView
@@ -209,15 +261,28 @@ class TableViewController: UITableViewController {
 
     //Optimization for shadow
     
-    /// 使用阴影路径方式添加阴影
+    /*
+     使用阴影路径方式添加阴影
+     不会出现离屏渲染，帧率平均在55fps，GPU使用率平均在20%左右 （iPhone 6plus iOS 10.2.4）
+     不会出现离屏渲染，帧率平均在55fps，GPU使用率平均在8%左右 （iPhone Xs iOS 12.4）
+     */
     /// - Parameter view: UIView
     func specifyShadowPathOn(_ view: UIView) {
+        view.layer.shadowColor = UIColor.black.cgColor;
+        view.layer.shadowOffset = CGSize(width: 5, height: 5);
+        view.layer.shadowOpacity = 1.0;
+        view.layer.shadowRadius = 5;
         let path = UIBezierPath(rect: view.bounds)
-        view.layer.shadowPath = path.cgPath
+        view.layer.shadowPath = path.cgPath //当将这句话注释完，会出现离屏渲染，卡顿严重 （iPhone 6Plus ,iPhone Xs）
     }
 
     
-    /// 通过Mask 实现圆角
+    /*
+     通过Mask UIImageView实现圆角
+     出现离屏渲染，帧率平均在55fps，GPU占用率在40% （iPhone Xs iOS 12.4）耗电
+     
+     出现离屏渲染，帧率平均在45fps，GPU占用率在85% （iPhone 6 Plus iOS 10.2.4） 耗电
+     */
     /// - Parameter cell: UITableViewCell
     func applyMaskOn(_ cell: UITableViewCell) {
         let avatorViewL = cell.viewWithTag(10) as! UIImageView
@@ -292,9 +357,18 @@ class TableViewController: UITableViewController {
      Typical use cases:
      Avoid redrawing expensive effects for static content
      Avoid redrawing of complex view hierarchies
+     
+     使用光栅化
+     
+     出现离屏渲染，帧率平均在55fps，一开始帧率偏低在30fps，后面帧率稳定在55fps，GPU占用率在40% （iPhone 6plus iOS 10.2.4）
+     出现离屏渲染，帧率平均在56fps，GPU占用率在18% （iPhone Xs iOS 12.4）
+     
+     tip：
+     出现离屏渲染，内容经常变化时，使用光栅化 会消耗更多的GPU资源，从而导致卡顿严重 （在内容不变化，复杂界面使用光栅化比较 友好）
+     
      */
     func enableRasterizationOn(_ view: UIView) {
         view.layer.shouldRasterize = true
-        view.layer.rasterizationScale = view.layer.contentsScale
+        view.layer.rasterizationScale = UIScreen.main.scale;
     }
 }
