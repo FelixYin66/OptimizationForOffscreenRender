@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		86A14A1C24DBADBD00B027CA /* TableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86A14A1B24DBADBD00B027CA /* TableViewCell.swift */; };
+		86A14A1E24DBB1AF00B027CA /* main2.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 86A14A1D24DBB1AF00B027CA /* main2.storyboard */; };
 		FD0551841CC7BA3F00AAFF82 /* L80.png in Resources */ = {isa = PBXBuildFile; fileRef = FD05517E1CC7BA3F00AAFF82 /* L80.png */; };
 		FD0551871CC7BA3F00AAFF82 /* R80.png in Resources */ = {isa = PBXBuildFile; fileRef = FD0551811CC7BA3F00AAFF82 /* R80.png */; };
 		FD0551911CC7C5D900AAFF82 /* L80@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FD05518F1CC7C5D900AAFF82 /* L80@2x.png */; };
@@ -25,6 +27,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		86A14A1B24DBADBD00B027CA /* TableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewCell.swift; sourceTree = "<group>"; };
+		86A14A1D24DBB1AF00B027CA /* main2.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = main2.storyboard; sourceTree = "<group>"; };
 		FD05517E1CC7BA3F00AAFF82 /* L80.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = L80.png; sourceTree = "<group>"; };
 		FD0551811CC7BA3F00AAFF82 /* R80.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = R80.png; sourceTree = "<group>"; };
 		FD05518F1CC7C5D900AAFF82 /* L80@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "L80@2x.png"; sourceTree = "<group>"; };
@@ -92,12 +96,14 @@
 			children = (
 				FD05518A1CC7BA4600AAFF82 /* Image */,
 				FDFAEC921CC79E6500A8C0C1 /* AppDelegate.swift */,
+				86A14A1B24DBADBD00B027CA /* TableViewCell.swift */,
 				FDFAECA41CC7A1DF00A8C0C1 /* TableViewController.swift */,
 				FD2EA3611CCBD075003AA2D8 /* DrawImage.swift */,
 				FDFAEC961CC79E6500A8C0C1 /* Main.storyboard */,
 				FDFAEC991CC79E6500A8C0C1 /* Assets.xcassets */,
 				FDFAEC9B1CC79E6500A8C0C1 /* LaunchScreen.storyboard */,
 				FDFAEC9E1CC79E6500A8C0C1 /* Info.plist */,
+				86A14A1D24DBB1AF00B027CA /* main2.storyboard */,
 			);
 			path = OffscreenRenderDemo;
 			sourceTree = "<group>";
@@ -165,6 +171,7 @@
 			files = (
 				FD0551841CC7BA3F00AAFF82 /* L80.png in Resources */,
 				FDFAEC9D1CC79E6500A8C0C1 /* LaunchScreen.storyboard in Resources */,
+				86A14A1E24DBB1AF00B027CA /* main2.storyboard in Resources */,
 				FD0551961CC885CA00AAFF82 /* RecRoundMask@2x.png in Resources */,
 				FD0551911CC7C5D900AAFF82 /* L80@2x.png in Resources */,
 				FD757CC91CCF5F8C00496364 /* RoundMask.png in Resources */,
@@ -184,6 +191,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				86A14A1C24DBADBD00B027CA /* TableViewCell.swift in Sources */,
 				FDFAEC931CC79E6500A8C0C1 /* AppDelegate.swift in Sources */,
 				FDFAECA51CC7A1DF00A8C0C1 /* TableViewController.swift in Sources */,
 				FD757CCC1CCF8C6600496364 /* README.md in Sources */,
@@ -309,7 +317,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = SR52437D77;
 				INFOPLIST_FILE = OffscreenRenderDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = seedante.OffscreenRenderDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -323,7 +331,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = SR52437D77;
 				INFOPLIST_FILE = OffscreenRenderDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = seedante.OffscreenRenderDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";

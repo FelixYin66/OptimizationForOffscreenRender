@@ -10,6 +10,14 @@ import UIKit
 
 
 /*
+ 
+ 
+ 以下说明都是基于运行环境为Xcode 11 正式版
+ 
+ 
+ */
+
+/*
  什么情况会造成离屏渲染：
  shouldRasterize，masks，shadows，edge antialiasing（抗锯齿），group opacity（不透明），渐变
  在使用圆角、阴影和遮罩等视图功能的时候，图层属性的混合体被指定为在未预合成之前不能直接在屏幕中绘制，所有就需要在屏幕外的上下文中渲染，即离屏渲染
@@ -79,8 +87,8 @@ class TableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath)
-//        let cell = tableView.dequeueReusableCell(withIdentifier: customeCellIdentifier, for: indexPath)
+//        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath) //使用Storyboard
+        let cell = tableView.dequeueReusableCell(withIdentifier: customeCellIdentifier, for: indexPath) //使用代码实现
 
         let labelL = cell.viewWithTag(30)
         let labelR = cell.viewWithTag(40)
@@ -103,7 +111,7 @@ class TableViewController: UITableViewController {
         /*RounderCorner Test*/
 
         //System Rounded Corner: if layer's contents is not nil, masksToBounds must be true. Is cornerRadius bigger, performance worse? No, when cornerRadius > 0, performance is same almost.
-//            applySystemRoundedCornerOn(cell)
+            applySystemRoundedCornerOn(cell)
 
         /*RounedCorner solution:
          1. Redraw contents and clip as rouned corner contens;
@@ -183,6 +191,11 @@ class TableViewController: UITableViewController {
      运行在iOS 10.2.1,圆角触发离屏渲染, fps平均达到50以上，GPU使用率达到80%以上(iPhone 6plus iOS 10.2.4)
      
      说明在iOS 12上苹果对 UIImageView 离屏渲染进行优化，不会出现这种情况
+     
+     Tip：
+     UITableViewCell通过Storyboard实现话，运行在iPhone上(iPhone 6plus iOS 10.2.4)会出现离屏渲染，但通过纯代码实现的UITableViewCell不会出现离屏渲染 时iOS 10优化后的
+     UITableViewCell通过Storyboard实现话，运行在iPhone上(iPhone Xs iOS 12.4)不会出现离屏渲染，纯代码也是如此
+     
      */
     func applySystemRoundedCornerOn(_ cell: UITableViewCell) {
         let avatorViewL = cell.viewWithTag(10) as! UIImageView
